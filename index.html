@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Maximum Reality Tycoon</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Bangers&display=swap');
+
+  :root {
+    --neon-pink: #ff2d78;
+    --neon-cyan: #00f5ff;
+    --neon-green: #39ff14;
+    --neon-gold: #ffd700;
+    --neon-purple: #bf00ff;
+    --dark-bg: #080810;
+    --panel-bg: rgba(10,10,25,0.92);
+    --mochkil-color: #ff6b35;
+    --azul-color: #00c8ff;
+    --hub-color: #bf00ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark-bg);
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Animated bg */
+  .bg-grid {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridPulse 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes gridPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* GLITCH TEXT */
+  @keyframes glitch1 {
+    0%,100% { clip-path: inset(0 0 95% 0); transform: translate(-3px,0); }
+    25% { clip-path: inset(40% 0 45% 0); transform: translate(3px,0); }
+    50% { clip-path: inset(80% 0 5% 0); transform: translate(-2px,0); }
+  }
+  @keyframes glitch2 {
+    0%,100% { clip-path: inset(50% 0 30% 0); transform: translate(3px,0); }
+    33% { clip-path: inset(10% 0 60% 0); transform: translate(-3px,0); }
+    66% { clip-path: inset(70% 0 15% 0); transform: translate(2px,0); }
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(5,5,15,0.97);
+    border-bottom: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0,245,255,0.2);
+    padding: 10px 14px;
+  }
+
+  .top-bar-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    color: var(--neon-cyan);
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px var(--neon-cyan);
+    margin-bottom: 10px;
+    text-align: center;
+    position: relative;
+  }
+
+  .top-bar-title::after {
+    content: 'MAXIMUM REALITY TYCOON';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    color: var(--neon-pink);
+    animation: glitch1 4s infinite;
+    text-shadow: 0 0 10px var(--neon-pink);
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .stat-pill {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    padding: 6px 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .stat-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+
+  .stat-bar {
+    height: 3px;
+    border-radius: 2px;
+    margin-top: 4px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden;
+  }
+
+  .stat-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .fan-energy .stat-value { color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); }
+  .fan-energy .stat-bar-fill { background: var(--neon-pink); box-shadow: 0 0 6px var(--neon-pink); }
+
+  .signal-sparks .stat-value { color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
+  .signal-sparks .stat-bar-fill { background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
+
+  /* MAIN CONTENT */
+  .game-body {
+    padding: 14px;
+    padding-bottom: 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* TICKER */
+  .ticker {
+    background: rgba(0,245,255,0.06);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .ticker-inner {
+    display: inline-block;
+    animation: ticker 25s linear infinite;
+    font-size: 10px;
+    color: var(--neon-cyan);
+    letter-spacing: 1px;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ROOM CARDS */
+  .room-card {
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid transparent;
+    transition: transform 0.15s, box-shadow 0.3s;
+    active-transform: scale(0.97);
+  }
+
+  .room-card:active { transform: scale(0.97); }
+
+  .room-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    filter: blur(0);
+    z-index: 0;
+  }
+
+  .room-card > * { position: relative; z-index: 1; }
+
+  /* Kitchen */
+  .room-kitchen {
+    background: linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,45,120,0.08) 100%);
+    border-color: rgba(255,107,53,0.4);
+    box-shadow: 0 0 20px rgba(255,107,53,0.1), inset 0 0 40px rgba(255,107,53,0.05);
+  }
+  .room-kitchen:active { box-shadow: 0 0 30px rgba(255,107,53,0.3); }
+
+  /* Lab */
+  .room-lab {
+    background: linear-gradient(135deg, rgba(0,200,255,0.12) 0%, rgba(191,0,255,0.08) 100%);
+    border-color: rgba(0,200,255,0.4);
+    box-shadow: 0 0 20px rgba(0,200,255,0.1), inset 0 0 40px rgba(0,200,255,0.05);
+  }
+
+  /* Signal Hub */
+  .room-hub {
+    background: linear-gradient(135deg, rgba(191,0,255,0.12) 0%, rgba(57,255,20,0.06) 100%);
+    border-color: rgba(191,0,255,0.4);
+    box-shadow: 0 0 20px rgba(191,0,255,0.1), inset 0 0 40px rgba(191,0,255,0.05);
+  }
+
+  .room-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .room-emoji {
+    font-size: 36px;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+
+  .room-title-block {}
+  .room-name {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .room-subtitle {
+    font-size: 9px;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    text-transform: uppercase;
+  }
+
+  .room-status {
+    margin-left: auto;
+    font-size: 9px;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    text-align: right;
+  }
+
+  .room-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .action-btn:active {
+    transform: scale(0.95);
+    filter: brightness(1.3);
+  }
+
+  .action-btn.kitchen-btn {
+    border-color: rgba(255,107,53,0.5);
+    color: var(--mochkil-color);
+  }
+  .action-btn.kitchen-btn:active { background: rgba(255,107,53,0.2); }
+
+  .action-btn.lab-btn {
+    border-color: rgba(0,200,255,0.5);
+    color: var(--azul-color);
+  }
+  .action-btn.lab-btn:active { background: rgba(0,200,255,0.2); }
+
+  .action-btn.hub-btn {
+    border-color: rgba(191,0,255,0.5);
+    color: var(--hub-color);
+  }
+  .action-btn.hub-btn:active { background: rgba(191,0,255,0.2); }
+
+  .action-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+  .action-label { font-size: 10px; opacity: 0.9; }
+  .action-reward { font-size: 9px; opacity: 0.5; margin-top: 2px; }
+
+  /* Cooldown bar */
+  .cooldown-bar {
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 1px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .cooldown-fill {
+    height: 100%;
+    border-radius: 1px;
+    width: 100%;
+    transition: width 0.1s linear;
+  }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(5,5,15,0.97);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .chat-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .chat-btn:active { transform: scale(0.96); filter: brightness(1.2); }
+
+  .chat-mochkil {
+    background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(255,45,120,0.2));
+    border: 1px solid var(--mochkil-color);
+    color: var(--mochkil-color);
+    box-shadow: 0 0 12px rgba(255,107,53,0.2);
+  }
+
+  .chat-azul {
+    background: linear-gradient(135deg, rgba(0,200,255,0.2), rgba(191,0,255,0.2));
+    border: 1px solid var(--azul-color);
+    color: var(--azul-color);
+    box-shadow: 0 0 12px rgba(0,200,255,0.2);
+  }
+
+  /* POPUP OVERLAY */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .popup-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .popup-card {
+    width: 100%;
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    transform: translateY(30px);
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .popup-overlay.active .popup-card {
+    transform: translateY(0);
+  }
+
+  .popup-card.mochkil-popup {
+    background: linear-gradient(135deg, rgba(20,8,5,0.98), rgba(40,15,8,0.98));
+    border: 1px solid var(--mochkil-color);
+    box-shadow: 0 0 40px rgba(255,107,53,0.3);
+  }
+
+  .popup-card.azul-popup {
+    background: linear-gradient(135deg, rgba(5,8,20,0.98), rgba(8,15,40,0.98));
+    border: 1px solid var(--azul-color);
+    box-shadow: 0 0 40px rgba(0,200,255,0.3);
+  }
+
+  .popup-card.hub-popup {
+    background: linear-gradient(135deg, rgba(10,5,20,0.98), rgba(20,8,35,0.98));
+    border: 1px solid var(--hub-color);
+    box-shadow: 0 0 40px rgba(191,0,255,0.3);
+  }
+
+  .popup-card.event-popup {
+    background: linear-gradient(135deg, rgba(5,15,5,0.98), rgba(10,25,10,0.98));
+    border: 1px solid var(--neon-green);
+    box-shadow: 0 0 40px rgba(57,255,20,0.3);
+  }
+
+  .popup-avatar {
+    font-size: 52px;
+    text-align: center;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 12px currentColor);
+    animation: floatAvatar 2s ease-in-out infinite;
+  }
+
+  @keyframes floatAvatar {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .popup-name {
+    font-family: 'Bangers', cursive;
+    font-size: 28px;
+    letter-spacing: 3px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .popup-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-align: center;
+    opacity: 0.5;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .popup-message {
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: center;
+    opacity: 0.9;
+    min-height: 60px;
+    margin-bottom: 16px;
+  }
+
+  .popup-reward {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    margin-bottom: 16px;
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* Chat input */
+  .chat-input-area {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .chat-input:focus {
+    border-color: rgba(255,255,255,0.4);
+  }
+
+  .chat-send-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+
+  .chat-send-btn:active { transform: scale(0.95); }
+
+  .chat-response {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 48px;
+    transition: all 0.3s;
+  }
+
+  .thinking-dots::after {
+    content: '...';
+    animation: dots 1s steps(3,end) infinite;
+  }
+
+  @keyframes dots {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+  }
+
+  .close-popup {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.6);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .close-popup:active { background: rgba(255,255,255,0.12); }
+
+  /* YouTube embed slot */
+  .yt-slot {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 14px;
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+  }
+
+  .yt-slot iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  .yt-slot-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,45,120,0.05);
+    border: 2px dashed rgba(255,45,120,0.3);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.3);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  /* MINI GAME */
+  .minigame-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 14px 0;
+  }
+
+  .signal-btn {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 1px solid rgba(191,0,255,0.3);
+    background: rgba(191,0,255,0.08);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .signal-btn.lit {
+    background: rgba(191,0,255,0.4);
+    border-color: var(--hub-color);
+    box-shadow: 0 0 15px rgba(191,0,255,0.5);
+    transform: scale(1.05);
+  }
+
+  .signal-btn.correct { background: rgba(57,255,20,0.3); border-color: var(--neon-green); }
+  .signal-btn.wrong { background: rgba(255,45,120,0.3); border-color: var(--neon-pink); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: rgba(10,10,25,0.95);
+    border: 1px solid var(--neon-green);
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(57,255,20,0.3);
+    z-index: 300;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Floating points */
+  .float-point {
+    position: fixed;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    pointer-events: none;
+    z-index: 400;
+    animation: floatUp 1.2s ease-out forwards;
+  }
+
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.3); }
+  }
+
+  /* Random event banner */
+  .event-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 150;
+    background: linear-gradient(90deg, var(--neon-pink), var(--hub-color));
+    padding: 8px 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    transform: translateY(-100%);
+    transition: transform 0.4s;
+  }
+
+  .event-banner.show { transform: translateY(0); }
+
+  /* Loading spinner for AI response */
+  .ai-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Level badge */
+  .level-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  /* Achievements */
+  .achievements-section {
+    margin-top: 4px;
+    padding: 14px;
+    background: rgba(255,215,0,0.04);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+
+  .achievements-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--neon-gold);
+    margin-bottom: 10px;
+    text-shadow: 0 0 8px var(--neon-gold);
+  }
+
+  .achievements-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .achievement-chip {
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    opacity: 0.4;
+    transition: all 0.3s;
+  }
+
+  .achievement-chip.unlocked {
+    opacity: 1;
+    border-color: var(--neon-gold);
+    box-shadow: 0 0 8px rgba(255,215,0,0.3);
+    color: var(--neon-gold);
+  }
+
+  /* Glitch flicker on hub */
+  @keyframes glitchFlicker {
+    0%,95%,100% { opacity: 1; }
+    96% { opacity: 0.4; }
+    97% { opacity: 1; }
+    98% { opacity: 0.2; }
+    99% { opacity: 1; }
+  }
+
+  .room-hub { animation: glitchFlicker 5s infinite; }
+
+  /* CHAT OVERLAYS */
+  .chat-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    background: var(--dark-bg);
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  }
+  .chat-overlay.open { transform: translateY(0); }
+
+  .chat-overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    flex-shrink: 0;
+  }
+  .mochkil-header {
+    background: linear-gradient(135deg, rgba(255,107,53,0.18), rgba(255,45,120,0.08));
+    border-bottom: 1px solid rgba(255,107,53,0.3);
+    box-shadow: 0 2px 20px rgba(255,107,53,0.12);
+  }
+  .azul-header {
+    background: linear-gradient(135deg, rgba(0,200,255,0.15), rgba(191,0,255,0.08));
+    border-bottom: 1px solid rgba(0,200,255,0.3);
+    box-shadow: 0 2px 20px rgba(0,200,255,0.12);
+  }
+  .chat-overlay-title { display: flex; align-items: center; gap: 12px; }
+
+  .chat-overlay-close {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chat-overlay-close:active { background: rgba(255,255,255,0.15); transform: scale(0.92); }
+
+  .chat-embed-wrap {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: #0a0a14;
+  }
+  .chat-embed-wrap > div { width: 100% !important; height: 100% !important; }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Event Banner -->
+<div class="event-banner" id="eventBanner">⚡ SNACK ATTACK INCOMING ⚡</div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="top-bar-title">MAXIMUM REALITY TYCOON</div>
+  <div class="stats-row">
+    <div class="stat-pill fan-energy">
+      <div class="stat-label">Fan Energy</div>
+      <div class="stat-value" id="fanEnergy">0</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="fanBar" style="width:0%"></div></div>
+    </div>
+    <div class="stat-pill signal-sparks">
+      <div class="stat-label">Signal Sparks</div>
+      <div class="stat-value" id="signalSparks">100</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="signalBar" style="width:100%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Game Body -->
+<div class="game-body">
+
+  <!-- Ticker -->
+  <div class="ticker">
+    <span class="ticker-inner">🐾 MOCHKIL'S SNACK ATTACK IS LIVE // AZUL DETECTED QUANTUM ANOMALY IN SECTOR 7 // SIGNAL HUB STABILITY AT 88% // NEW RECIPE UNLOCKED: DIGITAL RAMEN // FAN ENERGY SURGING // MAXIMUM REALITY IS LIVE &nbsp;&nbsp;&nbsp;&nbsp; 🐾 MOCHKIL'S SNACK ATTACK IS LIVE // AZUL DETECTED QUANTUM ANOMALY IN SECTOR 7</span>
+  </div>
+
+  <!-- YouTube Slot -->
+  <div class="yt-slot" id="ytSlot">
+    <div class="yt-slot-placeholder">
+      📺<br><br>FEATURED BROADCAST<br><span style="font-size:10px;opacity:0.5">// video loads here during events //</span>
+    </div>
+  </div>
+
+  <!-- Kitchen -->
+  <div class="room-card room-kitchen" onclick="openRoom('kitchen')">
+    <div class="level-badge" style="color:var(--mochkil-color)">LVL <span id="kitchenLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji" style="color:var(--mochkil-color)">🍳</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--mochkil-color)">KITCHEN</div>
+        <div class="room-subtitle">Mochkil HQ // Snack Command Center</div>
+      </div>
+    </div>
+    <div class="room-actions">
+      <div class="action-btn kitchen-btn" onclick="event.stopPropagation(); doAction('cook', event)">
+        <span class="action-icon">🥘</span>
+        <div class="action-label">COOK DISH</div>
+        <div class="action-reward">+15 FAN ENERGY</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-cook" style="background:var(--mochkil-color)"></div></div>
+      </div>
+      <div class="action-btn kitchen-btn" onclick="event.stopPropagation(); doAction('snack', event)">
+        <span class="action-icon">🍕</span>
+        <div class="action-label">SNACK ATTACK</div>
+        <div class="action-reward">+25 FAN ENERGY</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-snack" style="background:var(--mochkil-color)"></div></div>
+      </div>
+      <div class="action-btn kitchen-btn" onclick="event.stopPropagation(); doAction('event_kitchen', event)">
+        <span class="action-icon">🎉</span>
+        <div class="action-label">HOST EVENT</div>
+        <div class="action-reward">+40 FAN ENERGY</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-event_kitchen" style="background:var(--mochkil-color)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lab -->
+  <div class="room-card room-lab" onclick="openRoom('lab')">
+    <div class="level-badge" style="color:var(--azul-color)">LVL <span id="labLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji" style="color:var(--azul-color)">🔬</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--azul-color)">LAB</div>
+        <div class="room-subtitle">Azul HQ // Quantum Research Division</div>
+      </div>
+    </div>
+    <div class="room-actions">
+      <div class="action-btn lab-btn" onclick="event.stopPropagation(); doAction('experiment', event)">
+        <span class="action-icon">⚗️</span>
+        <div class="action-label">EXPERIMENT</div>
+        <div class="action-reward">+20 SPARKS</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-experiment" style="background:var(--azul-color)"></div></div>
+      </div>
+      <div class="action-btn lab-btn" onclick="event.stopPropagation(); doAction('hologram', event)">
+        <span class="action-icon">💠</span>
+        <div class="action-label">HOLOGRAM</div>
+        <div class="action-reward">+15 FAN+SPARKS</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-hologram" style="background:var(--azul-color)"></div></div>
+      </div>
+      <div class="action-btn lab-btn" onclick="event.stopPropagation(); doAction('upgrade', event)">
+        <span class="action-icon">🧬</span>
+        <div class="action-label">UPGRADE TECH</div>
+        <div class="action-reward">+35 BOTH</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-upgrade" style="background:var(--azul-color)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signal Hub -->
+  <div class="room-card room-hub" onclick="openRoom('hub')">
+    <div class="level-badge" style="color:var(--hub-color)">LVL <span id="hubLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji" style="color:var(--hub-color)">📡</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--hub-color)">SIGNAL HUB</div>
+        <div class="room-subtitle">Central Console // Glitch Defense Grid</div>
+      </div>
+    </div>
+    <div class="room-status">
+      <div style="color:var(--hub-color); font-size:11px;">STABILITY</div>
+      <div id="stabilityPct" style="font-family:'Orbitron',sans-serif; font-size:18px; color:var(--hub-color)">100%</div>
+    </div>
+    <div class="room-actions" style="margin-top:12px;">
+      <div class="action-btn hub-btn" onclick="event.stopPropagation(); doAction('stabilize', event)">
+        <span class="action-icon">🛡️</span>
+        <div class="action-label">STABILIZE</div>
+        <div class="action-reward">+20 SPARKS</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-stabilize" style="background:var(--hub-color)"></div></div>
+      </div>
+      <div class="action-btn hub-btn" onclick="event.stopPropagation(); openGlitchWave()">
+        <span class="action-icon">⚡</span>
+        <div class="action-label">GLITCH WAVE</div>
+        <div class="action-reward">+50 SPARKS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="achievements-section">
+    <div class="achievements-title">// ACHIEVEMENTS //</div>
+    <div class="achievements-row">
+      <div class="achievement-chip" id="ach-first-cook">🍳 First Cook</div>
+      <div class="achievement-chip" id="ach-snack-lord">🍕 Snack Lord</div>
+      <div class="achievement-chip" id="ach-quantum">💠 Quantum Leap</div>
+      <div class="achievement-chip" id="ach-stable">📡 Signal Master</div>
+      <div class="achievement-chip" id="ach-glitch">⚡ Glitch Slayer</div>
+      <div class="achievement-chip" id="ach-100">🔥 100 Fan Energy</div>
+      <div class="achievement-chip" id="ach-chat">💬 Chatted Up</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Bar -->
+<div class="bottom-bar">
+  <button class="chat-btn chat-mochkil" onclick="openChatEmbed('mochkil')">
+    🐾 CHAT MOCHKIL
+  </button>
+  <button class="chat-btn chat-azul" onclick="openChatEmbed('azul')">
+    🐾 CHAT AZUL
+  </button>
+</div>
+
+<!-- MOCHKIL CHAT OVERLAY -->
+<div class="chat-overlay" id="mochkilOverlay">
+  <div class="chat-overlay-header mochkil-header">
+    <div class="chat-overlay-title">
+      <span style="font-size:22px;">🐱</span>
+      <div>
+        <div style="font-family:'Bangers',cursive;font-size:22px;letter-spacing:3px;color:var(--mochkil-color);text-shadow:0 0 10px var(--mochkil-color)">MOCHKIL</div>
+        <div style="font-size:9px;letter-spacing:2px;opacity:0.5">CHEF // SNACK SQUAD CAPTAIN</div>
+      </div>
+    </div>
+    <button class="chat-overlay-close" onclick="closeChatEmbed('mochkil')">✕</button>
+  </div>
+  <div class="chat-embed-wrap" id="mochkilEmbed">
+    <div id="mcontext">
+      <script
+        mode="embed"
+        isolate="true"
+        themecolor="#FF9800"
+        header="off"
+        accentcolor="#000000"
+        textcolor="white"
+        id="webchat"
+        src="https://cdn.machaao.com/prod/web/js/embed.js"
+        type="text/javascript"
+        mkey="ZmJiNWFkMTAtMjI1OC0xMWYxLTkwZmQtNTEzZDJlMTU0MWU5">
+      </script>
+    </div>
+  </div>
+</div>
+
+<!-- AZUL CHAT OVERLAY -->
+<div class="chat-overlay" id="azulOverlay">
+  <div class="chat-overlay-header azul-header">
+    <div class="chat-overlay-title">
+      <span style="font-size:22px;">🐱</span>
+      <div>
+        <div style="font-family:'Bangers',cursive;font-size:22px;letter-spacing:3px;color:var(--azul-color);text-shadow:0 0 10px var(--azul-color)">AZUL</div>
+        <div style="font-size:9px;letter-spacing:2px;opacity:0.5">QUANTUM PHYSICIST // HACKER CAT</div>
+      </div>
+    </div>
+    <button class="chat-overlay-close" onclick="closeChatEmbed('azul')">✕</button>
+  </div>
+  <div class="chat-embed-wrap" id="azulEmbed">
+    <div id="mcontext">
+      <script
+        mode="embed"
+        isolate="true"
+        themecolor="#2196f3"
+        header="off"
+        accentcolor="#000000"
+        textcolor="white"
+        id="webchat"
+        src="https://cdn.machaao.com/prod/web/js/embed.js"
+        type="text/javascript"
+        mkey="MjA5ZmM0MDAtMjI1Mi0xMWYxLTgyYTMtNGRmYWZjOWI1NTA3">
+      </script>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP OVERLAY -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+  <div class="popup-card" id="popupCard">
+
+    <div class="popup-avatar" id="popupAvatar">🐾</div>
+    <div class="popup-name" id="popupName">MOCHKIL</div>
+    <div class="popup-title" id="popupTitle">CHEF // SNACK SQUAD CAPTAIN</div>
+    <div class="popup-message" id="popupMessage"></div>
+    <div class="popup-reward" id="popupReward" style="display:none"></div>
+
+    <!-- Chat input removed — live chatbots at maximumreality.xyz -->
+
+    <!-- Glitch Wave mini game -->
+    <div id="glitchWaveGame" style="display:none">
+      <div style="text-align:center; font-size:11px; letter-spacing:2px; opacity:0.6; margin-bottom:8px;">TAP THE SEQUENCE</div>
+      <div class="minigame-grid" id="signalGrid"></div>
+      <div style="text-align:center; font-family:'Orbitron',sans-serif; font-size:12px; margin-top:8px;" id="sequenceStatus">Watch the pattern...</div>
+    </div>
+
+    <button class="close-popup" onclick="closePopupDirect()">[ CLOSE ]</button>
+  </div>
+</div>
+
+<script>
+// ============ STATE ============
+const state = {
+  fanEnergy: 0,
+  signalSparks: 100,
+  stability: 100,
+  kitchenLevel: 1,
+  labLevel: 1,
+  hubLevel: 1,
+  achievements: {},
+  chatCount: 0,
+  cookCount: 0,
+  snackCount: 0,
+  glitchWins: 0,
+};
+
+const cooldowns = {};
+const COOLDOWN_MS = { cook: 3000, snack: 6000, event_kitchen: 10000, experiment: 5000, hologram: 4000, upgrade: 12000, stabilize: 4000 };
+
+// ============ CURRENCY ============
+function addFan(amt, x, y) {
+  state.fanEnergy = Math.min(9999, state.fanEnergy + amt);
+  updateUI();
+  floatPoint(`+${amt} ⚡`, '#ff2d78', x, y);
+  checkAchievements();
+}
+
+function addSparks(amt, x, y) {
+  state.signalSparks = Math.min(9999, state.signalSparks + amt);
+  updateUI();
+  floatPoint(`+${amt} 💜`, '#bf00ff', x, y);
+}
+
+function updateUI() {
+  document.getElementById('fanEnergy').textContent = state.fanEnergy;
+  document.getElementById('signalSparks').textContent = state.signalSparks;
+  document.getElementById('fanBar').style.width = Math.min(100, state.fanEnergy / 10) + '%';
+  document.getElementById('signalBar').style.width = Math.min(100, state.signalSparks / 10) + '%';
+  document.getElementById('stabilityPct').textContent = state.stability + '%';
+  document.getElementById('kitchenLevel').textContent = state.kitchenLevel;
+  document.getElementById('labLevel').textContent = state.labLevel;
+  document.getElementById('hubLevel').textContent = state.hubLevel;
+}
+
+// ============ FLOAT POINTS ============
+function floatPoint(text, color, x, y) {
+  const el = document.createElement('div');
+  el.className = 'float-point';
+  el.textContent = text;
+  el.style.color = color;
+  el.style.textShadow = `0 0 8px ${color}`;
+  el.style.left = (x || window.innerWidth/2) + 'px';
+  el.style.top = (y || 200) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+// ============ TOAST ============
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ============ ACTIONS ============
+function doAction(type, ev) {
+  const now = Date.now();
+  if (cooldowns[type] && now < cooldowns[type]) {
+    showToast('⏳ COOLDOWN ACTIVE');
+    return;
+  }
+  cooldowns[type] = now + (COOLDOWN_MS[type] || 3000);
+  startCooldownBar(type);
+
+  const rect = ev?.target?.getBoundingClientRect?.();
+  const cx = rect ? rect.left + rect.width/2 : window.innerWidth/2;
+  const cy = rect ? rect.top : 200;
+
+  switch(type) {
+    case 'cook':
+      state.cookCount++;
+      addFan(15 * state.kitchenLevel, cx, cy);
+      showToast('🍳 Mochkil cooked something legendary!');
+      if (state.cookCount === 1) unlockAchievement('first-cook', '🍳 First Cook Unlocked!');
+      maybeRandomEvent();
+      break;
+    case 'snack':
+      state.snackCount++;
+      addFan(25 * state.kitchenLevel, cx, cy);
+      showToast('#MochkilsSnackAttack 🍕');
+      if (state.snackCount >= 3) unlockAchievement('snack-lord', '🍕 Snack Lord Unlocked!');
+      maybeRandomEvent();
+      break;
+    case 'event_kitchen':
+      addFan(40 * state.kitchenLevel, cx, cy);
+      if (state.fanEnergy >= 100 && state.kitchenLevel === 1) {
+        state.kitchenLevel++;
+        showToast('🎉 KITCHEN UPGRADED TO LVL 2!');
+      } else {
+        showToast('🎉 Fan Event Complete!');
+      }
+      break;
+    case 'experiment':
+      addFan(10 * state.labLevel, cx, cy);
+      addSparks(20 * state.labLevel, cx, cy + 30);
+      unlockAchievement('quantum', '💠 Quantum Leap Unlocked!');
+      showToast('⚗️ Experiment successful!');
+      break;
+    case 'hologram':
+      addFan(15 * state.labLevel, cx, cy);
+      addSparks(15 * state.labLevel, cx, cy + 30);
+      showToast('💠 Hologram projected!');
+      break;
+    case 'upgrade':
+      addFan(35 * state.labLevel, cx, cy);
+      addSparks(35 * state.labLevel, cx, cy + 30);
+      if (state.signalSparks >= 150 && state.labLevel === 1) {
+        state.labLevel++;
+        showToast('🧬 LAB UPGRADED TO LVL 2!');
+      } else {
+        showToast('🧬 Tech upgraded!');
+      }
+      break;
+    case 'stabilize':
+      state.stability = Math.min(100, state.stability + 20);
+      addSparks(20 * state.hubLevel, cx, cy);
+      unlockAchievement('stable', '📡 Signal Master Unlocked!');
+      showToast('🛡️ Signal stabilized!');
+      break;
+  }
+  updateUI();
+}
+
+// ============ COOLDOWN BAR ============
+function startCooldownBar(type) {
+  const bar = document.getElementById('cd-' + type);
+  if (!bar) return;
+  const dur = COOLDOWN_MS[type] || 3000;
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  requestAnimationFrame(() => {
+    bar.style.transition = `width ${dur}ms linear`;
+    bar.style.width = '0%';
+  });
+}
+
+// ============ POPUP ============
+let popupMode = '';
+
+function openRoom(room) {
+  popupMode = 'room';
+  const card = document.getElementById('popupCard');
+  const overlay = document.getElementById('popupOverlay');
+  document.getElementById('glitchWaveGame').style.display = 'none';
+  document.getElementById('chatMode').style.display = 'none';
+  document.getElementById('popupReward').style.display = 'none';
+
+  const msgs = {
+    kitchen: {
+      cls: 'mochkil-popup',
+      avatar: '🐱',
+      name: 'MOCHKIL',
+      title: 'CHEF // SNACK SQUAD CAPTAIN',
+      msg: roomMessages.kitchen[Math.floor(Math.random() * roomMessages.kitchen.length)]
+    },
+    lab: {
+      cls: 'azul-popup',
+      avatar: '🐱',
+      name: 'AZUL',
+      title: 'QUANTUM PHYSICIST // HACKER CAT',
+      msg: roomMessages.lab[Math.floor(Math.random() * roomMessages.lab.length)]
+    },
+    hub: {
+      cls: 'hub-popup',
+      avatar: '📡',
+      name: 'SIGNAL HUB',
+      title: 'CENTRAL CONSOLE // STABILITY: ' + state.stability + '%',
+      msg: roomMessages.hub[Math.floor(Math.random() * roomMessages.hub.length)]
+    }
+  };
+
+  const d = msgs[room];
+  card.className = 'popup-card ' + d.cls;
+  document.getElementById('popupAvatar').textContent = d.avatar;
+  document.getElementById('popupName').textContent = d.name;
+  document.getElementById('popupTitle').textContent = d.title;
+  document.getElementById('popupMessage').textContent = d.msg;
+
+  overlay.classList.add('active');
+}
+
+
+
+// ============ GLITCH WAVE ============
+let gwSequence = [];
+let gwPlayerSeq = [];
+let gwPhase = 'watch';
+const GLITCH_ICONS = ['⚡','💜','🔵','🟢','🔴','🟡','💫','📡'];
+const GRID_SIZE = 8;
+
+function openGlitchWave() {
+  const card = document.getElementById('popupCard');
+  const overlay = document.getElementById('popupOverlay');
+  card.className = 'popup-card hub-popup';
+  document.getElementById('popupAvatar').textContent = '⚡';
+  document.getElementById('popupName').textContent = 'GLITCH WAVE';
+  document.getElementById('popupTitle').textContent = 'SIGNAL DEFENSE MINI-GAME';
+  document.getElementById('popupMessage').textContent = 'Memorize the sequence, then tap it back. Don\'t let the glitch win.';
+  document.getElementById('popupReward').style.display = 'none';
+  document.getElementById('chatMode').style.display = 'none';
+  document.getElementById('glitchWaveGame').style.display = 'block';
+  overlay.classList.add('active');
+
+  buildGrid();
+  startSequence();
+}
+
+function buildGrid() {
+  const grid = document.getElementById('signalGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < GRID_SIZE; i++) {
+    const btn = document.createElement('div');
+    btn.className = 'signal-btn';
+    btn.textContent = GLITCH_ICONS[i];
+    btn.dataset.idx = i;
+    btn.onclick = () => playerTap(i);
+    grid.appendChild(btn);
+  }
+}
+
+function startSequence() {
+  const len = 3 + Math.floor(state.hubLevel);
+  gwSequence = Array.from({length: len}, () => Math.floor(Math.random() * GRID_SIZE));
+  gwPlayerSeq = [];
+  gwPhase = 'watch';
+  document.getElementById('sequenceStatus').textContent = 'Watch the pattern...';
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i > 0) flashBtn(gwSequence[i-1], false);
+    if (i >= gwSequence.length) {
+      clearInterval(interval);
+      gwPhase = 'play';
+      document.getElementById('sequenceStatus').textContent = 'Your turn! Tap the sequence';
+      return;
+    }
+    flashBtn(gwSequence[i], true);
+    i++;
+  }, 700);
+}
+
+function flashBtn(idx, on) {
+  const btns = document.querySelectorAll('.signal-btn');
+  if (btns[idx]) btns[idx].classList.toggle('lit', on);
+}
+
+function playerTap(idx) {
+  if (gwPhase !== 'play') return;
+  const btns = document.querySelectorAll('.signal-btn');
+  btns[idx].classList.add('lit');
+  setTimeout(() => btns[idx].classList.remove('lit'), 200);
+  gwPlayerSeq.push(idx);
+
+  const pos = gwPlayerSeq.length - 1;
+  if (gwPlayerSeq[pos] !== gwSequence[pos]) {
+    btns[idx].classList.add('wrong');
+    setTimeout(() => btns[idx].classList.remove('wrong'), 400);
+    document.getElementById('sequenceStatus').textContent = '❌ GLITCH WINS — Try again!';
+    gwPhase = 'over';
+    setTimeout(startSequence, 1500);
+    return;
+  }
+
+  if (gwPlayerSeq.length === gwSequence.length) {
+    gwPhase = 'over';
+    document.getElementById('sequenceStatus').textContent = '✅ SEQUENCE MATCHED!';
+    state.glitchWins++;
+    const reward = 50 * state.hubLevel;
+    addSparks(reward, window.innerWidth/2, 300);
+    state.stability = Math.min(100, state.stability + 10);
+    if (state.hubLevel < 5 && state.signalSparks >= 200 * state.hubLevel) {
+      state.hubLevel++;
+      showToast('📡 SIGNAL HUB UPGRADED!');
+    }
+    unlockAchievement('glitch', '⚡ Glitch Slayer Unlocked!');
+    setTimeout(startSequence, 1800);
+  }
+}
+
+// ============ ROOM MESSAGES ============
+const roomMessages = {
+  kitchen: [
+    "No cap, this kitchen is the most blessed place in Maximum Reality. Every dish I make hits different fr fr. #MochkilsSnackAttack",
+    "Bro I literally added quantum particles to my ramen and it was giving EVERYTHING. The fans went absolutely feral.",
+    "I'm thinking a 14-course snack menu tonight. Is that too much? Trick question. It's never too much. Ever.",
+    "Azul tried to put science in my soup again. I told her this is a snack zone, not a lab. Respectfully.",
+    "Every ingredient in this kitchen has a vibe. You feel me? Like the hot sauce is DEFINITELY chaotic neutral."
+  ],
+  lab: [
+    "I've isolated a quantum probability strand that suggests the next snack attack has a 94.7% chance of being catastrophic. Excellent.",
+    "The holograms are behaving erratically. Either we have a glitch event or Mochkil is cooking near the servers again.",
+    "My latest experiment has opened a small rift in the signal fabric. I've labeled it 'Tuesday.' It will resolve.",
+    "Probability models confirm: chaos is the most efficient path to discovery. I find this deeply satisfying.",
+    "I've upgraded the lab's neural processors. We're now running at 340% baseline efficiency. Don't tell Mochkil — she'll want snacks for the processors."
+  ],
+  hub: [
+    "Signal stability at current levels. Three minor glitch events pending. Recommend immediate stabilization.",
+    "GLITCH WAVE DETECTED — multiple sectors flickering. Tap those monitors before the feed goes dark.",
+    "Fan energy is cascading through the network. The signal is getting... chaotic. Beautifully chaotic.",
+    "Warning: Mochkil's cooking emissions are interfering with Hub frequency on channels 4 and 7. Rerouting.",
+    "All systems nominal except the reality index, which is behaving in a way that is technically impossible. We love it here."
+  ]
+};
+
+// ============ ACHIEVEMENTS ============
+function unlockAchievement(id, msg) {
+  if (state.achievements[id]) return;
+  state.achievements[id] = true;
+  const el = document.getElementById('ach-' + id);
+  if (el) el.classList.add('unlocked');
+  showToast('🏆 ' + msg);
+}
+
+function checkAchievements() {
+  if (state.fanEnergy >= 100) unlockAchievement('100', '🔥 100 Fan Energy!');
+}
+
+// ============ RANDOM EVENTS ============
+function maybeRandomEvent() {
+  if (Math.random() > 0.25) return;
+  const events = [
+    { msg: '⚡ SNACK ATTACK', detail: 'Mochkil launched a surprise snack attack!' },
+    { msg: '💜 QUANTUM SURGE', detail: 'Azul detected a probability spike! +30 Sparks incoming.' },
+    { msg: '🔥 FAN SURGE', detail: 'A fan message just went viral! Bonus energy incoming.' },
+    { msg: '📡 GLITCH WAVE', detail: 'Minor glitch detected. Signal holding... for now.' },
+  ];
+  const ev = events[Math.floor(Math.random() * events.length)];
+  const banner = document.getElementById('eventBanner');
+  banner.textContent = ev.msg + ' — ' + ev.detail;
+  banner.classList.add('show');
+  setTimeout(() => banner.classList.remove('show'), 3000);
+
+  if (ev.msg.includes('SURGE')) addSparks(30, window.innerWidth/2, 100);
+  if (ev.msg.includes('FAN')) addFan(20, window.innerWidth/2, 100);
+}
+
+// ============ STABILITY DRAIN ============
+setInterval(() => {
+  if (state.stability > 0) {
+    state.stability = Math.max(0, state.stability - 1);
+    updateUI();
+  }
+}, 8000);
+
+// ============ POPUP CLOSE ============
+function closePopup(ev) {
+  if (ev.target === document.getElementById('popupOverlay')) closePopupDirect();
+}
+
+function closePopupDirect() {
+  document.getElementById('popupOverlay').classList.remove('active');
+}
+
+// ============ YOUTUBE SLOT ============
+// To change the video: setYouTube('YOUR_VIDEO_ID')
+function setYouTube(videoId) {
+  const slot = document.getElementById('ytSlot');
+  slot.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+}
+// setYouTube('dQw4w9WgXcQ'); // ← uncomment and replace with your video ID
+
+// ============ CHAT EMBED ============
+function openChatEmbed(who) {
+  unlockAchievement('chat', '💬 Chatted Up Unlocked!');
+  addFan(5, window.innerWidth / 2, 200);
+  const overlay = document.getElementById(who + 'Overlay');
+  overlay.classList.add('open');
+  // prevent body scroll while chat is open
+  document.body.style.overflow = 'hidden';
+}
+
+function closeChatEmbed(who) {
+  const overlay = document.getElementById(who + 'Overlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ============ INIT ============
+updateUI();
+</script>
+</body>
+</html>
