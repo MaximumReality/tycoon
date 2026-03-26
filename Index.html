@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Maximum Reality Tycoon</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Bangers&display=swap');
+
+  :root {
+    --neon-pink: #ff2d78;
+    --neon-cyan: #00f5ff;
+    --neon-green: #39ff14;
+    --neon-gold: #ffd700;
+    --neon-purple: #bf00ff;
+    --dark-bg: #080810;
+    --mochkil-color: #ff6b35;
+    --azul-color: #00c8ff;
+    --hub-color: #bf00ff;
+    --mishmish-color: #ffd166;
+    --bziz-color: #a0ff9f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark-bg);
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image: linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridPulse 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes gridPulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+  /* TOP BAR */
+  .top-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(5,5,15,0.97);
+    border-bottom: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0,245,255,0.2);
+    padding: 10px 14px;
+  }
+  .top-bar-title {
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 13px;
+    color: var(--neon-cyan); letter-spacing: 3px;
+    text-shadow: 0 0 10px var(--neon-cyan);
+    margin-bottom: 10px; text-align: center; position: relative;
+  }
+  .top-bar-title::after {
+    content: 'MAXIMUM REALITY TYCOON';
+    position: absolute; inset: 0;
+    color: var(--neon-pink);
+    animation: glitch1 4s infinite;
+    text-shadow: 0 0 10px var(--neon-pink);
+  }
+  @keyframes glitch1 {
+    0%,100%{clip-path:inset(0 0 95% 0);transform:translate(-3px,0)}
+    25%{clip-path:inset(40% 0 45% 0);transform:translate(3px,0)}
+    50%{clip-path:inset(80% 0 5% 0);transform:translate(-2px,0)}
+  }
+
+  .stats-row { display: flex; gap: 6px; }
+  .stat-pill { flex:1; background:rgba(255,255,255,0.04); border-radius:6px; padding:5px 7px; border:1px solid rgba(255,255,255,0.1); }
+  .stat-label { font-size:7px; letter-spacing:1.5px; opacity:0.6; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
+  .stat-rate { font-size:7px; opacity:0.4; }
+  .stat-value { font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px; margin-top:2px; }
+  .stat-bar { height:3px; border-radius:2px; margin-top:4px; background:rgba(255,255,255,0.1); overflow:hidden; }
+  .stat-bar-fill { height:100%; border-radius:2px; transition:width 0.5s ease; }
+  .fan-energy .stat-value { color:var(--neon-pink); text-shadow:0 0 8px var(--neon-pink); }
+  .fan-energy .stat-bar-fill { background:var(--neon-pink); }
+  .signal-sparks .stat-value { color:var(--neon-cyan); text-shadow:0 0 8px var(--neon-cyan); }
+  .signal-sparks .stat-bar-fill { background:var(--neon-cyan); }
+  .stability-stat .stat-value { color:var(--hub-color); text-shadow:0 0 8px var(--hub-color); }
+  .stability-stat .stat-bar-fill { background:var(--hub-color); transition:background 0.5s, width 0.5s; }
+  .stability-stat.danger .stat-value { color:var(--neon-pink)!important; animation:dangerPulse 0.6s infinite; }
+  .stability-stat.danger .stat-bar-fill { background:var(--neon-pink)!important; }
+  @keyframes dangerPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* GAME BODY */
+  .game-body { padding:14px; padding-bottom:100px; position:relative; z-index:1; }
+
+  /* TICKER */
+  .ticker { background:rgba(0,245,255,0.06); border:1px solid rgba(0,245,255,0.2); border-radius:4px; padding:6px 10px; margin-bottom:14px; overflow:hidden; white-space:nowrap; }
+  .ticker-inner { display:inline-block; animation:ticker 32s linear infinite; font-size:10px; color:var(--neon-cyan); letter-spacing:1px; }
+  @keyframes ticker { 0%{transform:translateX(100vw)} 100%{transform:translateX(-100%)} }
+
+  /* YOUTUBE */
+  .yt-slot { width:100%; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); margin-bottom:14px; position:relative; padding-bottom:56.25%; height:0; }
+  .yt-slot iframe { position:absolute; top:0;left:0;width:100%;height:100%;border:none; }
+  .yt-slot-placeholder { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,45,120,0.05);border:2px dashed rgba(255,45,120,0.3);border-radius:10px;color:rgba(255,255,255,0.3);font-size:12px;letter-spacing:2px;text-align:center;padding:20px; }
+
+  /* ROOM CARDS */
+  .room-card { border-radius:12px; padding:18px; margin-bottom:14px; cursor:pointer; position:relative; overflow:hidden; border:1px solid transparent; transition:transform 0.15s; }
+  .room-card:active { transform:scale(0.97); }
+  .room-card > * { position:relative; z-index:1; }
+
+  .room-kitchen { background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(255,45,120,0.08)); border-color:rgba(255,107,53,0.4); box-shadow:0 0 20px rgba(255,107,53,0.1); }
+  .room-lab { background:linear-gradient(135deg,rgba(0,200,255,0.12),rgba(191,0,255,0.08)); border-color:rgba(0,200,255,0.4); box-shadow:0 0 20px rgba(0,200,255,0.1); }
+  .room-hub { background:linear-gradient(135deg,rgba(191,0,255,0.12),rgba(57,255,20,0.06)); border-color:rgba(191,0,255,0.4); box-shadow:0 0 20px rgba(191,0,255,0.1); animation:glitchFlicker 5s infinite; }
+  .room-mishmish { background:linear-gradient(135deg,rgba(255,209,102,0.12),rgba(255,107,53,0.06)); border-color:rgba(255,209,102,0.4); box-shadow:0 0 20px rgba(255,209,102,0.1); animation:mishmishWiggle 3s ease-in-out infinite; }
+  .room-bziz { background:linear-gradient(135deg,rgba(160,255,159,0.1),rgba(0,200,255,0.05)); border-color:rgba(160,255,159,0.4); box-shadow:0 0 20px rgba(160,255,159,0.1); }
+
+  @keyframes glitchFlicker { 0%,95%,100%{opacity:1} 96%{opacity:0.4} 97%{opacity:1} 98%{opacity:0.2} 99%{opacity:1} }
+  @keyframes mishmishWiggle { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(0.4deg)} 75%{transform:rotate(-0.4deg)} }
+
+  .room-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .room-emoji { font-size:36px; }
+  .room-name { font-family:'Orbitron',sans-serif; font-weight:700; font-size:16px; line-height:1; margin-bottom:3px; }
+  .room-subtitle { font-size:9px; letter-spacing:2px; opacity:0.5; text-transform:uppercase; }
+
+  .room-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .action-btn { flex:1; min-width:80px; padding:10px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:#fff; font-family:'Share Tech Mono',monospace; font-size:11px; cursor:pointer; text-align:center; transition:all 0.2s; -webkit-tap-highlight-color:transparent; }
+  .action-btn:active { transform:scale(0.95); filter:brightness(1.3); }
+  .action-icon { font-size:18px; display:block; margin-bottom:4px; }
+  .action-label { font-size:10px; opacity:0.9; }
+  .action-reward { font-size:9px; opacity:0.5; margin-top:2px; }
+  .cooldown-bar { height:2px; background:rgba(255,255,255,0.08); border-radius:1px; margin-top:4px; overflow:hidden; }
+  .cooldown-fill { height:100%; border-radius:1px; width:0%; }
+
+  .kitchen-btn { border-color:rgba(255,107,53,0.5); color:var(--mochkil-color); }
+  .kitchen-btn:active { background:rgba(255,107,53,0.2); }
+  .lab-btn { border-color:rgba(0,200,255,0.5); color:var(--azul-color); }
+  .lab-btn:active { background:rgba(0,200,255,0.2); }
+  .hub-btn { border-color:rgba(191,0,255,0.5); color:var(--hub-color); }
+  .hub-btn:active { background:rgba(191,0,255,0.2); }
+  .mishmish-btn { border-color:rgba(255,209,102,0.5); color:var(--mishmish-color); }
+  .mishmish-btn:active { background:rgba(255,209,102,0.2); }
+  .bziz-btn { border-color:rgba(160,255,159,0.5); color:var(--bziz-color); }
+  .bziz-btn:active { background:rgba(160,255,159,0.2); }
+
+  .level-badge { position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:3px 10px; font-size:10px; letter-spacing:1px; font-family:'Orbitron',sans-serif; }
+
+  .collab-row { margin-top:10px; }
+  .collab-btn { width:100%; padding:8px; border-radius:8px; border:1px solid rgba(255,215,0,0.3); background:rgba(255,215,0,0.05); color:var(--neon-gold); font-family:'Share Tech Mono',monospace; font-size:11px; cursor:pointer; text-align:center; transition:all 0.2s; -webkit-tap-highlight-color:transparent; letter-spacing:1px; }
+  .collab-btn:active { background:rgba(255,215,0,0.15); }
+
+  .unlock-teaser { border-radius:12px; padding:14px; margin-bottom:14px; border:1px dashed rgba(255,255,255,0.1); background:rgba(255,255,255,0.02); text-align:center; font-size:11px; opacity:0.4; letter-spacing:1px; }
+
+  /* ACHIEVEMENTS */
+  .achievements-section { padding:14px; background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.15); border-radius:12px; margin-bottom:14px; }
+  .achievements-title { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:3px; color:var(--neon-gold); margin-bottom:10px; text-shadow:0 0 8px var(--neon-gold); }
+  .achievements-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .achievement-chip { background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.2); border-radius:20px; padding:4px 10px; font-size:11px; opacity:0.35; transition:all 0.4s; }
+  .achievement-chip.unlocked { opacity:1; border-color:var(--neon-gold); box-shadow:0 0 8px rgba(255,215,0,0.3); color:var(--neon-gold); }
+
+  /* BOTTOM BAR */
+  .bottom-bar { position:fixed; bottom:0;left:0;right:0; z-index:100; background:rgba(5,5,15,0.97); border-top:1px solid rgba(255,255,255,0.08); padding:12px 14px; display:flex; gap:10px; }
+  .chat-btn { flex:1; padding:12px; border-radius:10px; border:none; cursor:pointer; font-family:'Orbitron',sans-serif; font-weight:700; font-size:11px; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; -webkit-tap-highlight-color:transparent; }
+  .chat-btn:active { transform:scale(0.96); filter:brightness(1.2); }
+  .chat-mochkil { background:linear-gradient(135deg,rgba(255,107,53,0.2),rgba(255,45,120,0.2)); border:1px solid var(--mochkil-color); color:var(--mochkil-color); }
+  .chat-azul { background:linear-gradient(135deg,rgba(0,200,255,0.2),rgba(191,0,255,0.2)); border:1px solid var(--azul-color); color:var(--azul-color); }
+
+  /* CHAT OVERLAYS */
+  .chat-overlay { position:fixed; inset:0; z-index:500; display:flex; flex-direction:column; background:var(--dark-bg); transform:translateY(100%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.1); }
+  .chat-overlay.open { transform:translateY(0); }
+  .chat-overlay-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; flex-shrink:0; }
+  .mochkil-header { background:linear-gradient(135deg,rgba(255,107,53,0.18),rgba(255,45,120,0.08)); border-bottom:1px solid rgba(255,107,53,0.3); }
+  .azul-header { background:linear-gradient(135deg,rgba(0,200,255,0.15),rgba(191,0,255,0.08)); border-bottom:1px solid rgba(0,200,255,0.3); }
+  .chat-overlay-title { display:flex; align-items:center; gap:12px; }
+  .chat-overlay-close { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.7); width:38px;height:38px; border-radius:50%; font-size:16px; cursor:pointer; display:flex;align-items:center;justify-content:center; transition:all 0.2s; -webkit-tap-highlight-color:transparent; }
+  .chat-overlay-close:active { background:rgba(255,255,255,0.15); transform:scale(0.92); }
+  .chat-embed-wrap { flex:1; overflow:hidden; background:#0a0a14; }
+  .chat-embed-wrap > div { width:100%!important; height:100%!important; }
+
+  /* POPUP */
+  .popup-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; display:flex; align-items:flex-end; padding:14px; backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  .popup-overlay.active { opacity:1; pointer-events:all; }
+  .popup-card { width:100%; border-radius:16px; padding:20px; transform:translateY(30px); transition:transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275); }
+  .popup-overlay.active .popup-card { transform:translateY(0); }
+  .mochkil-popup { background:linear-gradient(135deg,rgba(20,8,5,0.98),rgba(40,15,8,0.98)); border:1px solid var(--mochkil-color); box-shadow:0 0 40px rgba(255,107,53,0.3); }
+  .azul-popup { background:linear-gradient(135deg,rgba(5,8,20,0.98),rgba(8,15,40,0.98)); border:1px solid var(--azul-color); box-shadow:0 0 40px rgba(0,200,255,0.3); }
+  .hub-popup { background:linear-gradient(135deg,rgba(10,5,20,0.98),rgba(20,8,35,0.98)); border:1px solid var(--hub-color); box-shadow:0 0 40px rgba(191,0,255,0.3); }
+  .event-popup { background:linear-gradient(135deg,rgba(5,15,5,0.98),rgba(10,25,10,0.98)); border:1px solid var(--neon-green); box-shadow:0 0 40px rgba(57,255,20,0.3); }
+  .mishmish-popup { background:linear-gradient(135deg,rgba(20,15,5,0.98),rgba(30,20,5,0.98)); border:1px solid var(--mishmish-color); box-shadow:0 0 40px rgba(255,209,102,0.3); }
+  .bziz-popup { background:linear-gradient(135deg,rgba(5,20,5,0.98),rgba(8,30,8,0.98)); border:1px solid var(--bziz-color); box-shadow:0 0 40px rgba(160,255,159,0.3); }
+
+  .popup-avatar { font-size:52px; text-align:center; margin-bottom:12px; animation:floatAvatar 2s ease-in-out infinite; }
+  @keyframes floatAvatar { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .popup-name { font-family:'Bangers',cursive; font-size:28px; letter-spacing:3px; text-align:center; margin-bottom:4px; }
+  .popup-title { font-size:9px; letter-spacing:3px; text-align:center; opacity:0.5; text-transform:uppercase; margin-bottom:14px; }
+  .popup-message { font-size:14px; line-height:1.6; text-align:center; opacity:0.9; min-height:60px; margin-bottom:16px; }
+  .popup-reward { text-align:center; font-family:'Orbitron',sans-serif; font-size:13px; margin-bottom:16px; padding:8px; border-radius:6px; background:rgba(255,255,255,0.05); }
+
+  /* GLITCH WAVE */
+  .minigame-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0; }
+  .signal-btn { aspect-ratio:1; border-radius:8px; border:1px solid rgba(191,0,255,0.3); background:rgba(191,0,255,0.08); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:20px; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+  .signal-btn.lit { background:rgba(191,0,255,0.4); border-color:var(--hub-color); box-shadow:0 0 15px rgba(191,0,255,0.5); transform:scale(1.05); }
+  .signal-btn.wrong { background:rgba(255,45,120,0.3); border-color:var(--neon-pink); }
+
+  /* TOAST */
+  .toast { position:fixed; top:80px; left:50%; transform:translateX(-50%) translateY(-20px); background:rgba(10,10,25,0.96); border:1px solid var(--neon-green); border-radius:20px; padding:10px 18px; font-family:'Orbitron',sans-serif; font-size:11px; color:var(--neon-green); box-shadow:0 0 20px rgba(57,255,20,0.3); z-index:300; white-space:nowrap; opacity:0; transition:all 0.3s; pointer-events:none; max-width:92vw; overflow:hidden; text-overflow:ellipsis; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.danger { border-color:var(--neon-pink)!important; color:var(--neon-pink)!important; box-shadow:0 0 20px rgba(255,45,120,0.4)!important; }
+  .toast.gold { border-color:var(--neon-gold)!important; color:var(--neon-gold)!important; box-shadow:0 0 20px rgba(255,215,0,0.3)!important; }
+
+  /* FLOAT POINTS */
+  .float-point { position:fixed; font-family:'Orbitron',sans-serif; font-weight:700; font-size:15px; pointer-events:none; z-index:400; animation:floatUp 1.2s ease-out forwards; }
+  @keyframes floatUp { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-80px) scale(1.3)} }
+
+  /* EVENT BANNER */
+  .event-banner { position:fixed; top:0;left:0;right:0; z-index:150; background:linear-gradient(90deg,var(--neon-pink),var(--hub-color)); padding:8px 14px; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; text-align:center; transform:translateY(-100%); transition:transform 0.4s; }
+  .event-banner.show { transform:translateY(0); }
+
+  .close-popup { width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.5); font-family:'Orbitron',sans-serif; font-size:11px; cursor:pointer; margin-top:8px; transition:all 0.2s; }
+  .close-popup:active { background:rgba(255,255,255,0.1); }
+
+  .reset-btn { width:100%; padding:8px; border-radius:8px; border:1px solid rgba(255,45,120,0.2); background:rgba(255,45,120,0.03); color:rgba(255,45,120,0.35); font-family:'Share Tech Mono',monospace; font-size:10px; cursor:pointer; margin-top:4px; letter-spacing:2px; transition:all 0.2s; }
+  .reset-btn:active { background:rgba(255,45,120,0.12); color:var(--neon-pink); }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="toast" id="toast"></div>
+<div class="event-banner" id="eventBanner"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-title">MAXIMUM REALITY TYCOON</div>
+  <div class="stats-row">
+    <div class="stat-pill fan-energy">
+      <div class="stat-label">Fan Energy <span class="stat-rate" id="fanRateLabel"></span></div>
+      <div class="stat-value" id="fanEnergy">0</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="fanBar" style="width:0%"></div></div>
+    </div>
+    <div class="stat-pill signal-sparks">
+      <div class="stat-label">Sparks <span class="stat-rate" id="sparkRateLabel"></span></div>
+      <div class="stat-value" id="signalSparks">100</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="signalBar" style="width:100%"></div></div>
+    </div>
+    <div class="stat-pill stability-stat" id="stabilityPill">
+      <div class="stat-label">Stability</div>
+      <div class="stat-value" id="stabilityVal">100%</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="stabilityBar" style="width:100%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME BODY -->
+<div class="game-body">
+
+  <div class="ticker">
+    <span class="ticker-inner">🐾 MOCHKIL'S SNACK ATTACK IS LIVE // AZUL DETECTED QUANTUM ANOMALY IN SECTOR 7 // SIGNAL HUB STABILITY FLUCTUATING // MISHMISH SPOTTED IN THE WALLS // BZIZ IS WATCHING // MAXIMUM REALITY IS LIVE &nbsp;&nbsp;&nbsp; 🐾 MOCHKIL'S SNACK ATTACK IS LIVE // AZUL DETECTED QUANTUM ANOMALY</span>
+  </div>
+
+  <div class="yt-slot" id="ytSlot">
+    <div class="yt-slot-placeholder">📺<br><br>FEATURED BROADCAST<br><span style="font-size:10px;opacity:0.5">// seasonal video loads here //</span></div>
+  </div>
+
+  <!-- KITCHEN -->
+  <div class="room-card room-kitchen" onclick="openRoom('kitchen')">
+    <div class="level-badge" style="color:var(--mochkil-color)">LVL <span id="kitchenLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji">🍳</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--mochkil-color)">KITCHEN</div>
+        <div class="room-subtitle">Mochkil HQ // Snack Command Center</div>
+      </div>
+    </div>
+    <div class="room-actions">
+      <div class="action-btn kitchen-btn" onclick="event.stopPropagation();doAction('cook',event)">
+        <span class="action-icon">🥘</span><div class="action-label">COOK DISH</div><div class="action-reward">+FAN ENERGY</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-cook" style="background:var(--mochkil-color)"></div></div>
+      </div>
+      <div class="action-btn kitchen-btn" onclick="event.stopPropagation();doAction('snack',event)">
+        <span class="action-icon">🍕</span><div class="action-label">SNACK ATTACK</div><div class="action-reward">+FAN ENERGY</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-snack" style="background:var(--mochkil-color)"></div></div>
+      </div>
+      <div class="action-btn kitchen-btn" onclick="event.stopPropagation();doAction('event_kitchen',event)">
+        <span class="action-icon">🎉</span><div class="action-label">UPGRADE</div><div class="action-reward" id="kitchenUpgradeCost">NEED 100⚡</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-event_kitchen" style="background:var(--mochkil-color)"></div></div>
+      </div>
+    </div>
+    <div class="collab-row">
+      <button class="collab-btn" onclick="event.stopPropagation();triggerInteraction('mochkil','azul',event)">⚡ MOCHKIL × AZUL COLLAB</button>
+    </div>
+  </div>
+
+  <!-- LAB -->
+  <div class="room-card room-lab" onclick="openRoom('lab')">
+    <div class="level-badge" style="color:var(--azul-color)">LVL <span id="labLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji">🔬</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--azul-color)">LAB</div>
+        <div class="room-subtitle">Azul HQ // Quantum Research Division</div>
+      </div>
+    </div>
+    <div class="room-actions">
+      <div class="action-btn lab-btn" onclick="event.stopPropagation();doAction('experiment',event)">
+        <span class="action-icon">⚗️</span><div class="action-label">EXPERIMENT</div><div class="action-reward">+FAN+SPARKS</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-experiment" style="background:var(--azul-color)"></div></div>
+      </div>
+      <div class="action-btn lab-btn" onclick="event.stopPropagation();doAction('hologram',event)">
+        <span class="action-icon">💠</span><div class="action-label">HOLOGRAM</div><div class="action-reward">+FAN+SPARKS</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-hologram" style="background:var(--azul-color)"></div></div>
+      </div>
+      <div class="action-btn lab-btn" onclick="event.stopPropagation();doAction('upgrade_lab',event)">
+        <span class="action-icon">🧬</span><div class="action-label">UPGRADE</div><div class="action-reward" id="labUpgradeCost">NEED 100💜</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-upgrade_lab" style="background:var(--azul-color)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNAL HUB -->
+  <div class="room-card room-hub" onclick="openRoom('hub')">
+    <div class="level-badge" style="color:var(--hub-color)">LVL <span id="hubLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji">📡</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--hub-color)">SIGNAL HUB</div>
+        <div class="room-subtitle">Central Console // Glitch Defense Grid</div>
+      </div>
+    </div>
+    <div class="room-actions" style="margin-top:4px">
+      <div class="action-btn hub-btn" onclick="event.stopPropagation();doAction('stabilize',event)">
+        <span class="action-icon">🛡️</span><div class="action-label">STABILIZE</div><div class="action-reward">+STABILITY</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-stabilize" style="background:var(--hub-color)"></div></div>
+      </div>
+      <div class="action-btn hub-btn" onclick="event.stopPropagation();openGlitchWave()">
+        <span class="action-icon">⚡</span><div class="action-label">GLITCH WAVE</div><div class="action-reward">+SPARKS+STABILITY</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISHMISH (hidden until unlocked) -->
+  <div id="mishmishTeaser" class="unlock-teaser">🐭 ??? — something is moving in the walls...</div>
+  <div class="room-card room-mishmish" id="mishmishRoom" style="display:none" onclick="openRoom('mishmish')">
+    <div class="level-badge" style="color:var(--mishmish-color)">LVL <span id="mishmishLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji">🐭</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--mishmish-color)">MISHMISH DEN</div>
+        <div class="room-subtitle">Chaos Node // Wall Network</div>
+      </div>
+    </div>
+    <div class="room-actions">
+      <div class="action-btn mishmish-btn" onclick="event.stopPropagation();doAction('scavenge',event)">
+        <span class="action-icon">🧀</span><div class="action-label">SCAVENGE</div><div class="action-reward">+FAN (FAST)</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-scavenge" style="background:var(--mishmish-color)"></div></div>
+      </div>
+      <div class="action-btn mishmish-btn" onclick="event.stopPropagation();doAction('speed',event)">
+        <span class="action-icon">⚡</span><div class="action-label">SPEED RUN</div><div class="action-reward">RANDOM FAN</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-speed" style="background:var(--mishmish-color)"></div></div>
+      </div>
+      <div class="action-btn mishmish-btn" onclick="event.stopPropagation();doAction('chaos',event)">
+        <span class="action-icon">🎲</span><div class="action-label">CHAOS BTN</div><div class="action-reward">WIN OR LOSE</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-chaos" style="background:var(--mishmish-color)"></div></div>
+      </div>
+    </div>
+    <div class="collab-row">
+      <button class="collab-btn" style="border-color:rgba(255,209,102,0.4);color:var(--mishmish-color)" onclick="event.stopPropagation();triggerInteraction('mishmish','bziz',event)">💀 MISHMISH × BZIZ CHAOS</button>
+    </div>
+  </div>
+
+  <!-- BZIZ (hidden until stability drops) -->
+  <div id="bzizTeaser" class="unlock-teaser">🐱 ??? — something large and judgemental is waiting...</div>
+  <div class="room-card room-bziz" id="bzizRoom" style="display:none" onclick="openRoom('bziz')">
+    <div class="level-badge" style="color:var(--bziz-color)">LVL <span id="bzizLevel">1</span></div>
+    <div class="room-header">
+      <div class="room-emoji">🐱</div>
+      <div class="room-title-block">
+        <div class="room-name" style="color:var(--bziz-color)">BZIZ DOMAIN</div>
+        <div class="room-subtitle">Control Core // Authority Layer</div>
+      </div>
+    </div>
+    <div class="room-actions">
+      <div class="action-btn bziz-btn" onclick="event.stopPropagation();doAction('intimidate',event)">
+        <span class="action-icon">😾</span><div class="action-label">INTIMIDATE</div><div class="action-reward">+STABILITY</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-intimidate" style="background:var(--bziz-color)"></div></div>
+      </div>
+      <div class="action-btn bziz-btn" onclick="event.stopPropagation();doAction('nap',event)">
+        <span class="action-icon">💤</span><div class="action-label">NAP BOOST</div><div class="action-reward">2× RATES 10s</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-nap" style="background:var(--bziz-color)"></div></div>
+      </div>
+      <div class="action-btn bziz-btn" onclick="event.stopPropagation();doAction('judge',event)">
+        <span class="action-icon">👁️</span><div class="action-label">JUDGE ALL</div><div class="action-reward">RESET CDs</div>
+        <div class="cooldown-bar"><div class="cooldown-fill" id="cd-judge" style="background:var(--bziz-color)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div class="achievements-section">
+    <div class="achievements-title">// ACHIEVEMENTS //</div>
+    <div class="achievements-row">
+      <div class="achievement-chip" id="ach-first-cook">🍳 First Cook</div>
+      <div class="achievement-chip" id="ach-snack-lord">🍕 Snack Lord</div>
+      <div class="achievement-chip" id="ach-quantum">💠 Quantum Leap</div>
+      <div class="achievement-chip" id="ach-stable">📡 Signal Master</div>
+      <div class="achievement-chip" id="ach-glitch">⚡ Glitch Slayer</div>
+      <div class="achievement-chip" id="ach-100">🔥 100 Fan Energy</div>
+      <div class="achievement-chip" id="ach-chat">💬 Chatted Up</div>
+      <div class="achievement-chip" id="ach-mishmish">🐭 Mishmish Found</div>
+      <div class="achievement-chip" id="ach-bziz">🐱 Bziz Awakened</div>
+      <div class="achievement-chip" id="ach-collab">⚡ First Collab</div>
+      <div class="achievement-chip" id="ach-survivor">💀 Signal Survivor</div>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="confirmReset()">[ RESET GAME DATA ]</button>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="chat-btn chat-mochkil" onclick="openChatEmbed('mochkil')">🐾 CHAT MOCHKIL</button>
+  <button class="chat-btn chat-azul" onclick="openChatEmbed('azul')">🐾 CHAT AZUL</button>
+</div>
+
+<!-- MOCHKIL OVERLAY -->
+<div class="chat-overlay" id="mochkilOverlay">
+  <div class="chat-overlay-header mochkil-header">
+    <div class="chat-overlay-title">
+      <span style="font-size:24px">🐱</span>
+      <div>
+        <div style="font-family:'Bangers',cursive;font-size:24px;letter-spacing:3px;color:var(--mochkil-color);text-shadow:0 0 10px var(--mochkil-color)">MOCHKIL</div>
+        <div style="font-size:9px;letter-spacing:2px;opacity:0.5">CHEF // SNACK SQUAD CAPTAIN</div>
+      </div>
+    </div>
+    <button class="chat-overlay-close" onclick="closeChatEmbed('mochkil')">✕</button>
+  </div>
+  <div class="chat-embed-wrap" id="mochkilEmbed">
+    <div id="mcontext">
+      <script mode="embed" isolate="true" themecolor="#FF9800" header="off" accentcolor="#000000" textcolor="white" id="webchat" src="https://cdn.machaao.com/prod/web/js/embed.js" type="text/javascript" mkey="ZmJiNWFkMTAtMjI1OC0xMWYxLTkwZmQtNTEzZDJlMTU0MWU5"></script>
+    </div>
+  </div>
+</div>
+
+<!-- AZUL OVERLAY -->
+<div class="chat-overlay" id="azulOverlay">
+  <div class="chat-overlay-header azul-header">
+    <div class="chat-overlay-title">
+      <span style="font-size:24px">🐱</span>
+      <div>
+        <div style="font-family:'Bangers',cursive;font-size:24px;letter-spacing:3px;color:var(--azul-color);text-shadow:0 0 10px var(--azul-color)">AZUL</div>
+        <div style="font-size:9px;letter-spacing:2px;opacity:0.5">QUANTUM PHYSICIST // HACKER CAT</div>
+      </div>
+    </div>
+    <button class="chat-overlay-close" onclick="closeChatEmbed('azul')">✕</button>
+  </div>
+  <div class="chat-embed-wrap" id="azulEmbed">
+    <iframe src="https://maximumreality.xyz/Azul.html" style="width:100%;height:100%;border:none;background:#0a0a14;" allow="microphone" title="Azul Chatbot"></iframe>
+  </div>
+</div>
+
+<!-- POPUP OVERLAY -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+  <div class="popup-card" id="popupCard">
+    <div class="popup-avatar" id="popupAvatar">🐾</div>
+    <div class="popup-name" id="popupName">MOCHKIL</div>
+    <div class="popup-title" id="popupTitle">CHEF // SNACK SQUAD CAPTAIN</div>
+    <div class="popup-message" id="popupMessage"></div>
+    <div class="popup-reward" id="popupReward" style="display:none"></div>
+    <div id="glitchWaveGame" style="display:none">
+      <div style="text-align:center;font-size:11px;letter-spacing:2px;opacity:0.6;margin-bottom:8px">TAP THE SEQUENCE</div>
+      <div class="minigame-grid" id="signalGrid"></div>
+      <div style="text-align:center;font-family:'Orbitron',sans-serif;font-size:12px;margin-top:8px" id="sequenceStatus">Watch the pattern...</div>
+    </div>
+    <button class="close-popup" onclick="closePopupDirect()">[ CLOSE ]</button>
+  </div>
+</div>
+
+<script>
+// ============ STATE ============
+const defaultState = {
+  fanEnergy: 0, signalSparks: 100, stability: 100,
+  kitchenLevel: 1, labLevel: 1, hubLevel: 1, mishmishLevel: 1, bzizLevel: 1,
+  mishmishUnlocked: false, bzizUnlocked: false, stabilityDropped: false,
+  fanRate: 1, sparkRate: 0.5,
+  achievements: {},
+  cookCount: 0, snackCount: 0, glitchWins: 0,
+  relationships: { mochkil_azul: 0, mishmish_bziz: -5 },
+  lastPlayed: Date.now()
+};
+let state = Object.assign({}, defaultState);
+
+// ============ SAVE / LOAD ============
+function saveGame() {
+  state.lastPlayed = Date.now();
+  localStorage.setItem('mr_tycoon_save', JSON.stringify(state));
+}
+
+function loadGame() {
+  const data = localStorage.getItem('mr_tycoon_save');
+  if (!data) return;
+  try {
+    const parsed = JSON.parse(data);
+    Object.assign(state, parsed);
+    // Offline gains — cap at 1 hour
+    const seconds = Math.min(3600, Math.floor((Date.now() - (state.lastPlayed || Date.now())) / 1000));
+    const fanGain = Math.floor(seconds * state.fanRate * state.kitchenLevel);
+    const sparkGain = Math.floor(seconds * state.sparkRate * state.labLevel);
+    state.fanEnergy = Math.min(9999, state.fanEnergy + fanGain);
+    state.signalSparks = Math.min(9999, state.signalSparks + sparkGain);
+    if (fanGain > 0 || sparkGain > 0) {
+      setTimeout(() => showToast(`⏱️ OFFLINE: +${fanGain}⚡ +${sparkGain}💜`, 'gold'), 900);
+    }
+  } catch(e) { /* corrupted save — start fresh */ }
+}
+
+function confirmReset() {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    localStorage.removeItem('mr_tycoon_save');
+    location.reload();
+  }
+}
+
+setInterval(saveGame, 3000);
+
+// ============ COOLDOWNS ============
+const cooldowns = {};
+const COOLDOWN_MS = {
+  cook: 3000, snack: 6000, event_kitchen: 12000,
+  experiment: 5000, hologram: 4000, upgrade_lab: 14000,
+  stabilize: 4000, scavenge: 1500, speed: 4000,
+  chaos: 8000, intimidate: 6000, nap: 30000, judge: 20000
+};
+
+function getUpgradeCost(level) { return 100 * level; }
+
+// ============ CURRENCY ============
+function addFan(amt, x, y) {
+  state.fanEnergy = Math.min(9999, state.fanEnergy + amt);
+  updateUI(); floatPoint(`+${amt}⚡`, '#ff2d78', x, y);
+  checkAchievements(); checkUnlocks();
+}
+
+function addSparks(amt, x, y) {
+  state.signalSparks = Math.min(9999, state.signalSparks + amt);
+  updateUI(); floatPoint(`+${amt}💜`, '#bf00ff', x, y);
+}
+
+// ============ UI ============
+function updateUI() {
+  document.getElementById('fanEnergy').textContent = state.fanEnergy;
+  document.getElementById('signalSparks').textContent = state.signalSparks;
+  document.getElementById('fanBar').style.width = Math.min(100, state.fanEnergy / 10) + '%';
+  document.getElementById('signalBar').style.width = Math.min(100, state.signalSparks / 10) + '%';
+
+  const stab = state.stability;
+  document.getElementById('stabilityVal').textContent = stab + '%';
+  document.getElementById('stabilityBar').style.width = stab + '%';
+  document.getElementById('stabilityPill').classList.toggle('danger', stab <= 30);
+
+  document.getElementById('kitchenLevel').textContent = state.kitchenLevel;
+  document.getElementById('labLevel').textContent = state.labLevel;
+  document.getElementById('hubLevel').textContent = state.hubLevel;
+  document.getElementById('mishmishLevel').textContent = state.mishmishLevel;
+  document.getElementById('bzizLevel').textContent = state.bzizLevel;
+
+  const kc = getUpgradeCost(state.kitchenLevel);
+  const lc = getUpgradeCost(state.labLevel);
+  document.getElementById('kitchenUpgradeCost').textContent = state.fanEnergy >= kc ? `UPGRADE (${kc}⚡)` : `NEED ${kc}⚡`;
+  document.getElementById('labUpgradeCost').textContent = state.signalSparks >= lc ? `UPGRADE (${lc}💜)` : `NEED ${lc}💜`;
+
+  document.getElementById('fanRateLabel').textContent = `+${(state.fanRate * state.kitchenLevel).toFixed(1)}/s`;
+  document.getElementById('sparkRateLabel').textContent = `+${(state.sparkRate * state.labLevel).toFixed(1)}/s`;
+}
+
+// ============ ACTIONS ============
+function doAction(type, ev) {
+  const now = Date.now();
+  if (cooldowns[type] && now < cooldowns[type]) { showToast('⏳ COOLDOWN ACTIVE'); return; }
+  cooldowns[type] = now + (COOLDOWN_MS[type] || 3000);
+  startCooldownBar(type);
+
+  const rect = ev?.target?.getBoundingClientRect?.();
+  const cx = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+  const cy = rect ? rect.top : 200;
+
+  switch(type) {
+    case 'cook':
+      state.cookCount++;
+      addFan(15 * state.kitchenLevel, cx, cy);
+      showToast('🍳 Mochkil cooked something legendary!');
+      if (state.cookCount === 1) unlockAchievement('first-cook', '🍳 First Cook Unlocked!');
+      if (Math.random() < 0.3) setTimeout(() => { showToast('🔵 Azul: "Cooking is destabilizing the signal..."'); state.stability = Math.max(0, state.stability - 5); updateUI(); }, 1200);
+      maybeRandomEvent();
+      break;
+
+    case 'snack':
+      state.snackCount++;
+      addFan(25 * state.kitchenLevel, cx, cy);
+      showToast('#MochkilsSnackAttack 🍕');
+      if (state.snackCount >= 3) unlockAchievement('snack-lord', '🍕 Snack Lord Unlocked!');
+      if (Math.random() < 0.3) setTimeout(() => { showToast('🔵 Azul: "Snack particles corrupting my data streams."'); state.stability = Math.max(0, state.stability - 3); updateUI(); }, 1200);
+      maybeRandomEvent();
+      break;
+
+    case 'event_kitchen': {
+      const cost = getUpgradeCost(state.kitchenLevel);
+      if (state.fanEnergy >= cost) {
+        state.fanEnergy -= cost; state.kitchenLevel++; state.fanRate += 0.5;
+        showToast(`🔥 KITCHEN LVL ${state.kitchenLevel}!`, 'gold');
+      } else { showToast(`Need ${cost}⚡ to upgrade Kitchen`); }
+      break;
+    }
+
+    case 'experiment':
+      addFan(10 * state.labLevel, cx, cy);
+      addSparks(20 * state.labLevel, cx, cy + 30);
+      unlockAchievement('quantum', '💠 Quantum Leap Unlocked!');
+      showToast('⚗️ Experiment successful!');
+      if (Math.random() < 0.3) setTimeout(() => showToast('🟠 Mochkil: "Bro why is the lab glowing again??"'), 1200);
+      break;
+
+    case 'hologram':
+      addFan(15 * state.labLevel, cx, cy);
+      addSparks(15 * state.labLevel, cx, cy + 30);
+      showToast('💠 Hologram projected!');
+      break;
+
+    case 'upgrade_lab': {
+      const cost = getUpgradeCost(state.labLevel);
+      if (state.signalSparks >= cost) {
+        state.signalSparks -= cost; state.labLevel++; state.sparkRate += 0.3;
+        showToast(`🧬 LAB LVL ${state.labLevel}!`, 'gold');
+      } else { showToast(`Need ${cost}💜 to upgrade Lab`); }
+      break;
+    }
+
+    case 'stabilize':
+      state.stability = Math.min(100, state.stability + 20);
+      addSparks(20 * state.hubLevel, cx, cy);
+      unlockAchievement('stable', '📡 Signal Master Unlocked!');
+      showToast('🛡️ Signal stabilized!');
+      break;
+
+    case 'scavenge':
+      addFan(8 * state.mishmishLevel, cx, cy);
+      showToast('🐭 Found snacks in the walls. No questions.');
+      break;
+
+    case 'speed': {
+      const rand = Math.floor(Math.random() * 35) + 5;
+      addFan(rand * state.mishmishLevel, cx, cy);
+      showToast(`⚡ Speedrun! +${rand * state.mishmishLevel}⚡`);
+      break;
+    }
+
+    case 'chaos':
+      if (Math.random() < 0.5) {
+        addFan(50 * state.mishmishLevel, cx, cy);
+        showToast('🎉 CHAOS WIN — absolute pandemonium!');
+      } else {
+        state.fanEnergy = Math.max(0, state.fanEnergy - 10);
+        showToast('💀 CHAOS BACKFIRED — Mishmish knocked everything over', 'danger');
+        updateUI();
+      }
+      break;
+
+    case 'intimidate':
+      state.stability = Math.min(100, state.stability + 15);
+      addSparks(10 * state.bzizLevel, cx, cy);
+      showToast('😾 Bziz stabilized the system through sheer contempt.');
+      break;
+
+    case 'nap':
+      state.fanRate *= 2; state.sparkRate *= 2;
+      showToast('💤 NAP BOOST — 2× rates for 10s', 'gold'); updateUI();
+      setTimeout(() => { state.fanRate /= 2; state.sparkRate /= 2; showToast('💤 Nap ended.'); updateUI(); }, 10000);
+      break;
+
+    case 'judge':
+      Object.keys(cooldowns).forEach(k => cooldowns[k] = 0);
+      document.querySelectorAll('.cooldown-fill').forEach(el => { el.style.transition = 'none'; el.style.width = '0%'; });
+      showToast('👁️ Bziz judged all cooldowns into submission.');
+      break;
+  }
+  saveGame(); updateUI();
+}
+
+// ============ COOLDOWN BAR ============
+function startCooldownBar(type) {
+  const bar = document.getElementById('cd-' + type);
+  if (!bar) return;
+  const dur = COOLDOWN_MS[type] || 3000;
+  bar.style.transition = 'none'; bar.style.width = '100%';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    bar.style.transition = `width ${dur}ms linear`; bar.style.width = '0%';
+  }));
+}
+
+// ============ FLOAT POINTS ============
+function floatPoint(text, color, x, y) {
+  const el = document.createElement('div');
+  el.className = 'float-point'; el.textContent = text;
+  el.style.color = color; el.style.textShadow = `0 0 8px ${color}`;
+  el.style.left = (x || window.innerWidth/2) + 'px'; el.style.top = (y || 200) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+// ============ TOAST ============
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = 'toast', 2400);
+}
+
+// ============ PASSIVE INCOME ============
+setInterval(() => {
+  state.fanEnergy = Math.min(9999, state.fanEnergy + state.fanRate * state.kitchenLevel);
+  state.signalSparks = Math.min(9999, state.signalSparks + state.sparkRate * state.labLevel);
+  updateUI();
+}, 1000);
+
+// ============ STABILITY DRAIN ============
+setInterval(() => {
+  if (state.stability > 0) {
+    state.stability = Math.max(0, state.stability - 1);
+    if (state.stability < 50) state.stabilityDropped = true;
+    updateUI(); checkUnlocks();
+  }
+}, 8000);
+
+// Signal loss pressure
+setInterval(() => {
+  if (state.stability <= 0) {
+    unlockAchievement('survivor', '💀 Signal Survivor!');
+    state.fanEnergy = Math.max(0, state.fanEnergy - 20);
+    showToast('💀 SIGNAL LOST — SYSTEM COLLAPSING', 'danger');
+    updateUI();
+  }
+}, 3000);
+
+// ============ UNLOCKS ============
+function checkUnlocks() {
+  if (!state.mishmishUnlocked && (state.cookCount + state.snackCount) >= 5) {
+    state.mishmishUnlocked = true;
+    unlockAchievement('mishmish', '🐭 Mishmish Found!');
+    showToast('⚡ SOMETHING SCURRIED THROUGH THE WALLS...', 'gold');
+    setTimeout(() => showToast('🐭 MISHMISH HAS ENTERED THE BUILDING', 'gold'), 2000);
+  }
+  if (!state.bzizUnlocked && state.stabilityDropped) {
+    state.bzizUnlocked = true;
+    unlockAchievement('bziz', '🐱 Bziz Awakened!');
+    showToast('⚠️ SYSTEM INSTABILITY DETECTED...', 'danger');
+    setTimeout(() => showToast('🐱 BZIZ: "I will handle this."'), 1800);
+  }
+  // Sync room visibility (also handles loading from save)
+  if (state.mishmishUnlocked) {
+    document.getElementById('mishmishTeaser').style.display = 'none';
+    document.getElementById('mishmishRoom').style.display = 'block';
+  }
+  if (state.bzizUnlocked) {
+    document.getElementById('bzizTeaser').style.display = 'none';
+    document.getElementById('bzizRoom').style.display = 'block';
+  }
+}
+
+// ============ ACHIEVEMENTS ============
+function unlockAchievement(id, msg) {
+  if (state.achievements[id]) return;
+  state.achievements[id] = true;
+  const el = document.getElementById('ach-' + id);
+  if (el) el.classList.add('unlocked');
+  if (msg) setTimeout(() => showToast('🏆 ' + msg, 'gold'), 100);
+}
+
+function checkAchievements() {
+  if (state.fanEnergy >= 100) unlockAchievement('100', '🔥 100 Fan Energy!');
+}
+
+function syncAchievements() {
+  Object.keys(state.achievements).forEach(id => {
+    const el = document.getElementById('ach-' + id);
+    if (el) el.classList.add('unlocked');
+  });
+}
+
+// ============ CHARACTER INTERACTIONS ============
+function triggerInteraction(a, b, ev) {
+  const key = [a, b].sort().join('_');
+  if (!state.relationships[key]) state.relationships[key] = 0;
+  const outcomes = getInteractionOutcomes(a, b);
+  const result = outcomes[Math.floor(Math.random() * outcomes.length)];
+  if (result.fan) addFan(result.fan, ev?.clientX, ev?.clientY);
+  if (result.sparks) addSparks(result.sparks, (ev?.clientX || 0) + 20, (ev?.clientY || 200) + 20);
+  if (result.stability) { state.stability = Math.max(0, Math.min(100, state.stability + result.stability)); updateUI(); }
+  state.relationships[key] += (result.relationship || 0);
+  unlockAchievement('collab', '⚡ First Collab!');
+  showPopupEvent(result);
+  saveGame();
+}
+
+function getInteractionOutcomes(a, b) {
+  const pair = [a, b].sort().join('_');
+  const map = {
+    'azul_mochkil': [
+      { msg: "Mochkil turned Azul's experiment into a snack. It somehow worked.", fan: 30, sparks: 15, relationship: 2 },
+      { msg: "Azul tried to optimize the recipe. Mochkil said 'no cap' and ignored her.", fan: 15, sparks: 10, relationship: 1 },
+      { msg: "They accidentally opened a flavor vortex. The fans went absolutely feral.", fan: 50, sparks: 30, relationship: 3 },
+      { msg: "Mochkil fed Azul experimental ramen. Azul floated 3 inches higher for an hour.", fan: 25, sparks: 20, relationship: 2 }
+    ],
+    'bziz_mishmish': [
+      { msg: "Mishmish stole food. Bziz chased. The entire kitchen was destroyed. Fans loved it.", fan: 50, stability: -10, relationship: -1 },
+      { msg: "Bziz sat on Mishmish. Problem solved. Temporarily.", fan: 20, sparks: 5, stability: 10, relationship: -2 },
+      { msg: "They formed a temporary alliance. This is deeply suspicious.", fan: 35, sparks: 20, stability: 5, relationship: 1 },
+      { msg: "Mishmish tried to scavenge Bziz's territory. Bziz simply stared. Mishmish left.", fan: 15, stability: 15, relationship: 0 }
+    ]
+  };
+  return map[pair] || [{ msg: "Something chaotic happened. Nobody understands it.", fan: 15, sparks: 10, relationship: 0 }];
+}
+
+function showPopupEvent(result) {
+  document.getElementById('popupCard').className = 'popup-card event-popup';
+  document.getElementById('popupAvatar').textContent = '✨';
+  document.getElementById('popupName').textContent = 'INTERACTION';
+  document.getElementById('popupTitle').textContent = 'CHARACTER EVENT';
+  document.getElementById('popupMessage').textContent = result.msg;
+  document.getElementById('glitchWaveGame').style.display = 'none';
+  const parts = [];
+  if (result.fan) parts.push(`+${result.fan} Fan`);
+  if (result.sparks) parts.push(`+${result.sparks} Sparks`);
+  if (result.stability) parts.push(`${result.stability > 0 ? '+' : ''}${result.stability} Stability`);
+  const rewardEl = document.getElementById('popupReward');
+  rewardEl.textContent = parts.join(' // ');
+  rewardEl.style.display = parts.length ? 'block' : 'none';
+  document.getElementById('popupOverlay').classList.add('active');
+}
+
+// ============ ROOM POPUP ============
+const roomMessages = {
+  kitchen: [
+    "No cap, this kitchen is the most blessed place in Maximum Reality. Every dish hits different fr fr. #MochkilsSnackAttack",
+    "I literally added quantum particles to my ramen and it was giving EVERYTHING. The fans went absolutely feral.",
+    "14-course snack menu tonight. Is that too much? Trick question. It is never too much.",
+    "Azul tried to put science in my soup again. I told her this is a snack zone. Respectfully.",
+    "Every ingredient in this kitchen has a vibe. The hot sauce is DEFINITELY chaotic neutral."
+  ],
+  lab: [
+    "Quantum probability analysis indicates the next snack attack has a 94.7% chance of being catastrophic. Excellent.",
+    "The holograms are behaving erratically. Either a glitch event or Mochkil is cooking near the servers again.",
+    "My latest experiment opened a small rift in the signal fabric. I've labeled it Tuesday. It will resolve.",
+    "Probability models confirm: chaos is the most efficient path to discovery. I find this deeply satisfying.",
+    "Neural processors upgraded to 340% efficiency. Do not tell Mochkil — she will want snacks for the processors."
+  ],
+  hub: [
+    "Signal stability at current levels. Three minor glitch events pending. Stabilize immediately.",
+    "GLITCH WAVE DETECTED — multiple sectors flickering. Tap those monitors before the feed goes dark.",
+    "Fan energy cascading through the network. Beautifully chaotic.",
+    "Warning: Mochkil's cooking emissions interfering with channels 4 and 7. Rerouting.",
+    "All systems nominal except the reality index, which is behaving impossibly. We love it here."
+  ],
+  mishmish: [
+    "bro I found this in the walls don't ask questions 🧀",
+    "speedrun strats activated 🏃‍♂️💨",
+    "ok so like it might explode but also might be snacks",
+    "they said I couldn't survive in Maximum Reality. they were wrong and also I ate their lunch",
+    "no one can catch me. not even Bziz. (do not tell Bziz I said that)"
+  ],
+  bziz: [
+    "This entire system is inefficient. I will allow it to continue. For now.",
+    "I will tolerate this chaos briefly. Do not mistake patience for approval.",
+    "You are all chaotic. I am the solution. You are welcome.",
+    "Mishmish was in my territory again. I judged him. He left. Order restored.",
+    "The signal stability concerns me. I have chosen to care. Briefly."
+  ]
+};
+
+function openRoom(room) {
+  const card = document.getElementById('popupCard');
+  document.getElementById('glitchWaveGame').style.display = 'none';
+  document.getElementById('popupReward').style.display = 'none';
+  const conf = {
+    kitchen:  { cls:'mochkil-popup', avatar:'🐱', name:'MOCHKIL',    title:'CHEF // SNACK SQUAD CAPTAIN' },
+    lab:      { cls:'azul-popup',    avatar:'🐱', name:'AZUL',       title:'QUANTUM PHYSICIST // HACKER CAT' },
+    hub:      { cls:'hub-popup',     avatar:'📡', name:'SIGNAL HUB', title:`STABILITY: ${state.stability}%` },
+    mishmish: { cls:'mishmish-popup',avatar:'🐭', name:'MISHMISH',   title:'CHAOS NODE // WALL NETWORK' },
+    bziz:     { cls:'bziz-popup',    avatar:'🐱', name:'BZIZ',       title:'CONTROL CORE // AUTHORITY LAYER' }
+  };
+  const d = conf[room] || conf.hub;
+  card.className = 'popup-card ' + d.cls;
+  document.getElementById('popupAvatar').textContent = d.avatar;
+  document.getElementById('popupName').textContent = d.name;
+  document.getElementById('popupTitle').textContent = d.title;
+  const msgs = roomMessages[room] || roomMessages.hub;
+  document.getElementById('popupMessage').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+  document.getElementById('popupOverlay').classList.add('active');
+}
+
+// ============ RANDOM EVENTS ============
+function maybeRandomEvent() {
+  if (Math.random() > 0.25) return;
+  const events = [
+    { msg:'⚡ SNACK ATTACK — Mochkil launched a surprise attack! Bonus fan energy.', fan:15 },
+    { msg:'💜 QUANTUM SURGE — Azul detected a probability spike! +30 Sparks.', sparks:30 },
+    { msg:'🔥 FAN SURGE — A fan post just went viral!', fan:20 },
+    { msg:'📡 GLITCH WAVE — Minor glitch detected. Signal holding... for now.', stability:-5 },
+  ];
+  const ev = events[Math.floor(Math.random() * events.length)];
+  const banner = document.getElementById('eventBanner');
+  banner.textContent = ev.msg;
+  banner.classList.add('show');
+  setTimeout(() => banner.classList.remove('show'), 3000);
+  if (ev.sparks) addSparks(ev.sparks, window.innerWidth/2, 100);
+  if (ev.fan) addFan(ev.fan, window.innerWidth/2, 100);
+  if (ev.stability) { state.stability = Math.max(0, state.stability + ev.stability); updateUI(); }
+}
+
+// ============ GLITCH WAVE ============
+let gwSequence = [], gwPlayerSeq = [], gwPhase = 'idle';
+const GW_ICONS = ['⚡','💜','🔵','🟢','🔴','🟡','💫','📡'];
+
+function openGlitchWave() {
+  document.getElementById('popupCard').className = 'popup-card hub-popup';
+  document.getElementById('popupAvatar').textContent = '⚡';
+  document.getElementById('popupName').textContent = 'GLITCH WAVE';
+  document.getElementById('popupTitle').textContent = 'SIGNAL DEFENSE MINI-GAME';
+  document.getElementById('popupMessage').textContent = "Memorize the sequence, then tap it back. Don't let the glitch win.";
+  document.getElementById('popupReward').style.display = 'none';
+  document.getElementById('glitchWaveGame').style.display = 'block';
+  document.getElementById('popupOverlay').classList.add('active');
+  buildGlitchGrid(); startGlitchSeq();
+}
+
+function buildGlitchGrid() {
+  const grid = document.getElementById('signalGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const btn = document.createElement('div');
+    btn.className = 'signal-btn'; btn.textContent = GW_ICONS[i]; btn.dataset.idx = i;
+    btn.onclick = () => gwTap(i);
+    grid.appendChild(btn);
+  }
+}
+
+function startGlitchSeq() {
+  const len = 3 + Math.floor(state.hubLevel);
+  gwSequence = Array.from({length:len}, () => Math.floor(Math.random() * 8));
+  gwPlayerSeq = []; gwPhase = 'watch';
+  document.getElementById('sequenceStatus').textContent = 'Watch the pattern...';
+  let i = 0;
+  const iv = setInterval(() => {
+    if (i > 0) gwFlash(gwSequence[i-1], false);
+    if (i >= gwSequence.length) { clearInterval(iv); gwPhase = 'play'; document.getElementById('sequenceStatus').textContent = 'Your turn!'; return; }
+    gwFlash(gwSequence[i], true); i++;
+  }, 700);
+}
+
+function gwFlash(idx, on) {
+  const btns = document.querySelectorAll('.signal-btn');
+  if (btns[idx]) btns[idx].classList.toggle('lit', on);
+}
+
+function gwTap(idx) {
+  if (gwPhase !== 'play') return;
+  const btns = document.querySelectorAll('.signal-btn');
+  btns[idx].classList.add('lit');
+  setTimeout(() => btns[idx].classList.remove('lit'), 200);
+  gwPlayerSeq.push(idx);
+  const pos = gwPlayerSeq.length - 1;
+  if (gwPlayerSeq[pos] !== gwSequence[pos]) {
+    btns[idx].classList.add('wrong');
+    setTimeout(() => { btns[idx].classList.remove('wrong'); }, 400);
+    document.getElementById('sequenceStatus').textContent = '❌ GLITCH WINS — Retry!';
+    gwPhase = 'over'; setTimeout(startGlitchSeq, 1500); return;
+  }
+  if (gwPlayerSeq.length === gwSequence.length) {
+    gwPhase = 'over';
+    document.getElementById('sequenceStatus').textContent = '✅ SEQUENCE MATCHED!';
+    state.glitchWins++;
+    addSparks(50 * state.hubLevel, window.innerWidth/2, 300);
+    state.stability = Math.min(100, state.stability + 10);
+    const hCost = getUpgradeCost(state.hubLevel);
+    if (state.signalSparks >= hCost) { state.signalSparks -= hCost; state.hubLevel++; showToast('📡 SIGNAL HUB UPGRADED!', 'gold'); }
+    unlockAchievement('glitch', '⚡ Glitch Slayer Unlocked!');
+    setTimeout(startGlitchSeq, 1800); updateUI(); saveGame();
+  }
+}
+
+// ============ POPUP CLOSE ============
+function closePopup(ev) { if (ev.target === document.getElementById('popupOverlay')) closePopupDirect(); }
+function closePopupDirect() { document.getElementById('popupOverlay').classList.remove('active'); }
+
+// ============ CHAT OVERLAYS ============
+function openChatEmbed(who) {
+  unlockAchievement('chat', '💬 Chatted Up Unlocked!');
+  addFan(5, window.innerWidth/2, 200);
+  document.getElementById(who + 'Overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeChatEmbed(who) {
+  document.getElementById(who + 'Overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ============ YOUTUBE ============
+function setYouTube(id) {
+  document.getElementById('ytSlot').innerHTML = `<iframe src="https://www.youtube.com/embed/${id}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+}
+setYouTube('Fkub9EGTFIk');
+
+// ============ INIT ============
+loadGame();
+checkUnlocks();
+syncAchievements();
+updateUI();
+</script>
+</body>
+</html>
